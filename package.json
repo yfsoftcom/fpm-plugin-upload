@@ -1,6 +1,6 @@
 {
   "name": "fpm-plugin-upload",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A Plugin Named [fpm-plugin-upload] For YF-FPM-SERVER~",
   "main": "lib/index.js",
   "scripts": {
@@ -13,8 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "koa-multer": "^1.0.2",
-    "lodash": "^4.17.4",
-    "superagent": "^4.0.0-beta.5"
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",
@@ -28,6 +27,7 @@
     "mocha": "^3.2.0",
     "nodemon": "^1.11.0",
     "yf-fpm-client-js": "^1.0.2",
-    "yf-fpm-server": "^2.4.11"
+    "yf-fpm-server": "^2.4.11",
+    "superagent": "^4.0.0-beta.5"
   }
 }

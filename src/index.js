@@ -11,7 +11,8 @@ module.exports = {
   bind: (fpm) => {
     const config = fpm.getConfig('upload', {
       dir: 'public/uploads',
-      field: 'file',
+      field: 'upload',
+      base: '/uploads/',
       accept: [
         'application/octet-stream',
         'application/json',
@@ -57,6 +58,8 @@ module.exports = {
             datas['latest'] = data;
             ctx.body = {
                 errno: 0,
+                uploaded: true,
+                url: config.base + data.filename,
                 data: _.assign({
                     id: data.hash,
                     path: path.join(config.dir, data.filename),
@@ -64,10 +67,11 @@ module.exports = {
                 })
             }
         }catch(e){
-            ctx.body({
+            ctx.body = {
               errno: -1,
               message: e.toString(),
-            })
+              uploaded: false,
+            };
         }
     }
     fpm.registerAction('FPM_ROUTER', () => {

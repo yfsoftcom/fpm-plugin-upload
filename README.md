@@ -14,7 +14,8 @@ npm i fpm-plugin-upload --save
   {
     "upload":{
       "dir": "public/uploads",
-      "field": "file",
+      "field": "upload",
+      "base": "/uploads", // the origin file webserver perfix
       "accept": [
         "application/octet-stream",
         "application/json",

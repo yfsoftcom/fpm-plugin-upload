@@ -1,39 +1,33 @@
 var should = require("chai").should();
 var request = require('superagent');
 const fs = require('fs');
+const path = require('path');
+
+const crypto = require('crypto');
+
+const baseDir = path.join(__dirname, '../public/uploads/');
 
 describe('Function', function(){
-  beforeEach(done => {
-    done()
+
+  after(done => {
+    // clean
+    fs.readdir(baseDir, (err, files) => {
+      if (err) throw err;
+      for(let f of files){
+        fs.unlinkSync(path.join(baseDir, f));
+      }
+      done()
+    })
   })
-
-  afterEach(done => {
-    done()
-  })
-
-
 
   it('Function Upload', function(done){
     request
      .post('http://localhost:9999/upload')
-     .attach('file', "test/test.json")
+     .attach('upload', "test/test.json")
      .end((err, result) => {
-       console.log(err, result.body);
+       if(err) throw err;
+       console.log(result.body);
        done(err);
      })
-  })
-
-  it('Function Download', function(done){
-
-      request
-        .get('http://localhost:9999/download/latest')
-        .responseType('arraybuffer')
-        .then((res) => {
-          console.log(res.body.toString() == '{"v": "a"}');
-          done();
-        })
-        .catch(err => {
-          done(err);
-        })
   })
 })

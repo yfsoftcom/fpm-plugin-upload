@@ -1,6 +1,6 @@
 {
   "name": "fpm-plugin-upload",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A Plugin Named [fpm-plugin-upload] For YF-FPM-SERVER~",
   "main": "lib/index.js",
   "scripts": {
@@ -22,6 +22,7 @@
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
     "nodemon": "^1.11.0",
+    "qiniu": "^7.2.1",
     "superagent": "^4.0.0-beta.5",
     "transform-runtime": "0.0.0",
     "yf-fpm-client-js": "^1.0.2",

@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const multer = require('koa-multer');
 const path = require('path');
-const fs = require('fs');
 const crypto = require('crypto');
 
 module.exports = {
@@ -19,6 +18,14 @@ module.exports = {
         'image/png',
         'image/jpeg'],    // Allowed type
       limit: 5,  // 5MB
+      storage: 'qiniu',
+      qiniu: {
+        bucket: 'yfsoft',
+        domain: 'cdn.yunplus.io',
+        ACCESS_KEY: '65nep44MNB8Ft1v_L1f7jaSnP8P07buuMMN4kI81',
+        SECRET_KEY: 'kZxy-i93_B98yg4lNn7XmSujeZh_JWRxQOJX3E_m',
+        zone: 'z2',
+      }
 
     }, fpm.getConfig('upload', {}));
     const fileFilter = (req, file, cb) =>{
@@ -30,16 +37,22 @@ module.exports = {
     }
 
     const dest = path.join(fpm.get('CWD'), config.dir);
-    const storage = multer.diskStorage({
-      destination: (req, file, cb) =>{
-        cb(null, dest)
-      },
-      filename: (req, file, cb) =>{
-        crypto.randomBytes(16, (err, raw) =>{
-          cb(err, err ? undefined : (raw.toString('hex') + path.extname(file.originalname)))
-        })
-      }
-    })
+    let storage;
+    if(config.storage == 'qiniu'){
+      const QiniuStorage = require('../storage/qiniu.js');
+      storage = new QiniuStorage(config.qiniu);
+    }else{
+      storage = multer.diskStorage({
+        destination: (req, file, cb) =>{
+          cb(null, dest)
+        },
+        filename: (req, file, cb) =>{
+          crypto.randomBytes(16, (err, raw) =>{
+            cb(err, err ? undefined : (raw.toString('hex') + path.extname(file.originalname)))
+          })
+        }
+      })
+    }
 
     // define the default upload function
     const upload = multer({ fileFilter: fileFilter, storage: storage, limits: { fileSize: config.limit * 1024 * 1024 }});
@@ -61,10 +74,10 @@ module.exports = {
             ctx.body = {
                 errno: 0,
                 uploaded: true,
-                url: config.base + filename,
+                url: data.url || config.base + filename,
                 data: {
                   hash: data.hash,
-                  path: config.base + filename,
+                  path: data.url || config.base + filename,
                 }
             }
         }catch(e){

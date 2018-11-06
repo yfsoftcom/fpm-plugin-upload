@@ -1,0 +1,24 @@
+{
+  "upload":{
+    "dir": "public/uploads/",
+    "field": "upload",
+    "uploadRouter": "/upload",
+    "base": "/uploads/",
+    "accept": [
+        "application/octet-stream",
+        "application/json",
+        "application/zip",
+        "application/x-zip-compressed",
+        "image/png",
+        "image/jpeg"],
+    "limit": 5,
+    "storage": "qiniu",
+    "qiniu": {
+      "bucket": "yfsoft",
+      "domain": "cdn.yunplus.io",
+      "ACCESS_KEY": "*",
+      "SECRET_KEY": "*",
+      "zone": "z2"
+    }
+  }
+}

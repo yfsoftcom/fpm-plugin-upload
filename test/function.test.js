@@ -1,9 +1,6 @@
-var should = require("chai").should();
 var request = require('superagent');
 const fs = require('fs');
 const path = require('path');
-
-const crypto = require('crypto');
 
 const baseDir = path.join(__dirname, '../public/uploads/');
 

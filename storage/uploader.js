@@ -2,6 +2,7 @@ const _ = require('lodash');
 const crypto = require('crypto');
 const qiniu = require('qiniu');
 const config = new qiniu.conf.Config();
+const { readMd5 } = require('../src/kit');
 
 let _options = {
   isInit: false,
@@ -36,6 +37,12 @@ const uploadStream = async (file) => {
   const uptoken = getToken(key);
   const extra = new qiniu.form_up.PutExtra();
   const formUploader = new qiniu.form_up.FormUploader(config);
+  let stat = {};
+  try {
+    stat = await readMd5(file.stream);
+  } catch (error) {
+  }
+  
   return new Promise( (rs, rj) =>{
     formUploader.putStream(uptoken, key, file.stream, extra, (err, ret) => {
       if(err){
@@ -46,6 +53,7 @@ const uploadStream = async (file) => {
         }else{
           ret.url = 'http://' + _options.domain + '/'+ ret.key;
           ret.filename = ret.key;
+          ret.md5 = stat.md5;
           rs(ret)
         }
       }
@@ -58,7 +66,9 @@ const sync = async (file)=>{
     throw new Error('options not inited')
   //调用uploadFile上传
   try{
-    let rst = await uploadStream(file)
+
+    const rst = await uploadStream(file)
+
     return rst
   }catch(e){
     return e;

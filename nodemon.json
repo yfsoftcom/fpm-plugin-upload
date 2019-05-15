@@ -27,6 +27,7 @@
     "watch": [
     ],
     "env": {
+      "DEBUG": "fpm-plugin-upload",
       "NODE_ENV": "development"
     }
   }

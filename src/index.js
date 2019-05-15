@@ -2,6 +2,9 @@ const _ = require('lodash');
 const multer = require('koa-multer');
 const path = require('path');
 const crypto = require('crypto');
+const debug = require('debug')('fpm-plugin-upload');
+const fs = require('fs');
+const { readMd5 } = require('./kit');
 
 module.exports = {
   bind: (fpm) => {
@@ -18,7 +21,7 @@ module.exports = {
         'image/png',
         'image/jpeg'],    // Allowed type
       limit: 5,  // 5MB
-      storage: 'qiniu',
+      storage: 'disk',
       qiniu: {
         bucket: 'yfsoft',
         domain: 'cdn.yunplus.io',
@@ -28,11 +31,13 @@ module.exports = {
       }
 
     }, fpm.getConfig('upload', {}));
+
+    debug('The upload plugin config: %O', config);
     const fileFilter = (req, file, cb) =>{
       if(_.indexOf(config.accept, file.mimetype)> -1){
-          cb(null, 1)
+        cb(null, 1)
       }else{
-          cb({ errno: -801, code: 'TYPE_NOT_ALLOWD', message: 'only images, zip, json accept'})
+        cb({ errno: -801, code: 'TYPE_NOT_ALLOWD', message: 'only images, zip, json accept'})
       }
     }
 
@@ -63,30 +68,38 @@ module.exports = {
 
     // 捕获异常
     const handler = async (ctx, next) => {
-        try{
-            await defaultHandler(ctx, next)
-            const data = ctx.req.file;
-            const { filename } = data;
-            data.hash = path.basename(filename, path.extname(filename));
-
-            fpm.publish('#upload/success', data);
-
-            ctx.body = {
-                errno: 0,
-                uploaded: true,
-                url: data.url || config.base + filename,
-                data: {
-                  hash: data.hash,
-                  path: data.url || config.base + filename,
-                }
-            }
-        }catch(e){
-            ctx.body = {
-              errno: -1,
-              message: e.toString(),
-              uploaded: false,
-            };
+      try{
+        await defaultHandler(ctx, next)
+        const data = ctx.req.file;
+        const { filename } = data;
+        data.hash = path.basename(filename, path.extname(filename));
+        // get md5 and total for file
+        if(!! data.path && config.storage === 'disk' ){
+          // data.size = await getFilesize(data.path);
+          const fileStat = await readMd5(fs.createReadStream(data.path) );
+          data.md5 = fileStat.md5;
+          data.size = fileStat.size;
         }
+        fpm.publish('#upload/success', data);
+
+        ctx.body = {
+          errno: 0,
+          uploaded: true,
+          url: data.url || config.base + filename,
+          data: {
+            hash: data.hash,
+            path: data.url || config.base + filename,
+            size: data.size || -1,
+            md5: data.md5 || '',
+          }
+        }
+      }catch(e){
+        ctx.body = {
+          errno: -1,
+          message: e.toString(),
+          uploaded: false,
+        };
+      }
     }
     fpm.registerAction('FPM_ROUTER', () => {
       const router = fpm.createRouter();

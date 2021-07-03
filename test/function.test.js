@@ -8,6 +8,10 @@ describe('Function', function(){
 
   after(done => {
     // clean
+    if (!fs.existsSync(baseDir)) {
+      done();
+      return;
+    }
     fs.readdir(baseDir, (err, files) => {
       if (err) throw err;
       for(let f of files){

@@ -1,3 +1,6 @@
+## 1.1.1 (2021-07-03)
+Add `ali cloud` store support.
+
 ## 0.0.4 (2018-11-06)
 Add `qiniu` store support.
 

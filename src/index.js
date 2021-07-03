@@ -22,14 +22,6 @@ module.exports = {
         'image/jpeg'],    // Allowed type
       limit: 5,  // 5MB
       storage: 'disk',
-      qiniu: {
-        bucket: 'yfsoft',
-        domain: 'cdn.yunplus.io',
-        ACCESS_KEY: '65nep44MNB8Ft1v_L1f7jaSnP8P07buuMMN4kI81',
-        SECRET_KEY: 'kZxy-i93_B98yg4lNn7XmSujeZh_JWRxQOJX3E_m',
-        zone: 'z2',
-      }
-
     }, fpm.getConfig('upload', {}));
 
     debug('The upload plugin config: %O', config);
@@ -43,10 +35,13 @@ module.exports = {
 
     const dest = path.join(fpm.get('CWD'), config.dir);
     let storage;
-    if(config.storage == 'qiniu'){
+    if (config.storage == 'qiniu') {
       const QiniuStorage = require('../storage/qiniu.js');
       storage = new QiniuStorage(config.qiniu);
-    }else{
+    } else if (config.storage === 'oss') {
+      const OssStorage = require('../storage/oss.js');
+      storage = new OssStorage(config.oss);
+    } else {
       storage = multer.diskStorage({
         destination: (req, file, cb) =>{
           cb(null, dest)
@@ -74,7 +69,7 @@ module.exports = {
         const { filename } = data;
         data.hash = path.basename(filename, path.extname(filename));
         // get md5 and total for file
-        if(!! data.path && config.storage === 'disk' ){
+        if(config.storage === 'disk' && !! data.path ){
           // data.size = await getFilesize(data.path);
           const fileStat = await readMd5(fs.createReadStream(data.path) );
           data.md5 = fileStat.md5;

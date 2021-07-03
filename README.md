@@ -61,7 +61,36 @@ npm i fpm-plugin-upload --save
     filename: '408e19877d7b2c73_test.json'
   }
   ```
+### Support Alicloud OSS
 
+- modify config.json
+
+  ```javascript
+  {
+    "upload": {
+      "dir": "public/uploads/",
+      "field": "upload",
+      "uploadRouter": "/upload",
+      "base": "/uploads/",
+      "accept": [
+          "application/octet-stream",
+          "application/json",
+          "application/zip",
+          "application/x-zip-compressed",
+          "image/png",
+          "image/jpeg"],
+      "limit": 5,
+      "storage": "oss", // add oss
+      "oss": {
+        "bucket": "bucket-yunplus-io-object",
+        "domain": "",
+        "ACCESS_KEY": "*",
+        "SECRET_KEY": "*",
+        "zone": ""
+      }
+    }
+  }
+  ```
 ### Support Qiniu
 
 - modify config.json

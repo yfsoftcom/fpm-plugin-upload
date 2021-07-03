@@ -16,4 +16,9 @@ const readMd5 = (stream) =>{
   })
 }
 
+const random = () => {
+  return crypto.randomBytes(8).toString('hex');
+}
+
 exports.readMd5 = readMd5;
+exports.random = random;
